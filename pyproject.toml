@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "plotkit"
+version = "0.1.0"
+description = "Publication-ready scientific figures with matplotlib and seaborn."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = ["matplotlib", "seaborn", "pandas", "numpy"]
+
+[project.optional-dependencies]
+polars = ["polars"]
+latex = []
+dev = [
+  "pytest", "pytest-cov", "pytest-mpl", "ruff", "mypy",
+  "colorspacious", "pandas-stubs",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/plotkit"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests", "examples"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "D"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+"examples/*" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+strict = true
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = ["seaborn.*", "colorspacious.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=plotkit --cov-report=term-missing"
+filterwarnings = ["error::UserWarning:plotkit"]
