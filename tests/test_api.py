@@ -113,6 +113,17 @@ def test_umap_embedding():
     assert len(res.ax.collections) == 4 and res.overlaps() == []
 
 
+def test_dim_red_precomputed_arrays():
+    emb = np.random.default_rng(0).normal(size=(30, 2))
+    lab = ["a", "b", "c"] * 10
+    for data in (emb, emb.tolist()):
+        res = plotkit.dim_red("D1", "D2", "T", data, hue=lab)
+        assert len(res.ax.collections) == 3
+    torch = pytest.importorskip("torch")
+    t = torch.tensor(emb, requires_grad=True)
+    assert len(plotkit.dim_red("D1", "D2", "T", t, hue=lab).ax.collections) == 3
+
+
 def test_boxplot_mapping_continuous_variants():
     res = plotkit.boxplot("g", "v", "T", {"a": [1, 2, 3, 4.0], "b": [2, 3, 4, 9.0]}, points=True)
     assert [t.get_text() for t in res.ax.get_xticklabels()] == ["a", "b"]

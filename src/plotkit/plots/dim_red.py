@@ -39,7 +39,9 @@ def umap_embedding(
 class DimRedPlot(BasePlot):
     """2-D embedding colored by ``hue``.
 
-    ``method=None``: ``data`` already holds coordinate columns ``x_name`` and ``y_name``.
+    ``method=None``: ``data`` is already reduced: a table with coordinate columns ``x_name``
+    and ``y_name``, or an unnamed ``(n, >=2)`` array (numpy / scikit-learn output, torch tensor,
+    cupy / cuML output; first two columns used) with ``hue`` an array-like of labels.
     ``method="pca"`` or ``"umap"``: ``data`` holds features (all numeric columns except
     ``hue``); the embedding is computed here and ``x_name`` / ``y_name`` become the axis
     labels (PCA appends the explained variance, e.g. ``PC1 (53%)``).
@@ -55,7 +57,12 @@ class DimRedPlot(BasePlot):
         """Columns ``x``, ``y`` and optionally ``hue``."""
         hue, method = self.opt["hue"], self.opt["method"]
         if method is None:
-            return DataAdapter.normalize(self.data, x=self.xcol, y=self.ycol, hue=hue).frame
+            frame = DataAdapter.to_frame(self.data)
+            if isinstance(frame.columns, pd.RangeIndex):  # unnamed array: first two columns
+                if frame.shape[1] < 2:
+                    raise DataError("embedding needs at least 2 columns")
+                return DataAdapter.normalize(None, x=frame[0], y=frame[1], hue=hue).frame
+            return DataAdapter.normalize(frame, x=self.xcol, y=self.ycol, hue=hue).frame
         frame = DataAdapter.to_frame(self.data)
         feats = frame.drop(columns=[hue] if hue else []).select_dtypes("number")
         if feats.shape[1] < 2:

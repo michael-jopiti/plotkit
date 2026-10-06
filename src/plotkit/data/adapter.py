@@ -40,7 +40,7 @@ class Normalized:
 
 
 class DataAdapter:
-    """Convert pandas, polars (eager or lazy), mappings and array-likes to pandas."""
+    """Convert pandas, polars, cudf, mappings and numpy/torch/cupy arrays to pandas."""
 
     @classmethod
     def to_frame(cls, data: Any) -> pd.DataFrame:
@@ -68,7 +68,7 @@ class DataAdapter:
             return pd.DataFrame(data)
         if hasattr(data, "to_pandas"):
             return cls.to_frame(data.to_pandas())
-        arr = np.asarray(data)
+        arr = np.asarray(cls._to_host(data))
         if arr.ndim == 2:
             return pd.DataFrame(arr)
         raise DataError(f"cannot convert {type(data).__name__} to a table")
@@ -87,7 +87,7 @@ class DataAdapter:
                 obj = obj[obj.columns[0]]
             s = pd.Series(obj.to_numpy(), name=obj.name)
         else:
-            arr = np.asarray(obj)
+            arr = np.asarray(cls._to_host(obj))
             if arr.ndim != 1:
                 raise DataError(f"expected 1-D data, got {arr.ndim}-D")
             s = pd.Series(arr)
@@ -172,6 +172,16 @@ class DataAdapter:
                 f"inputs have unequal lengths: { {r: len(s) for r, s in cols.items()} }"
             )
         return Normalized(pd.DataFrame(cols), labels)
+
+    @staticmethod
+    def _to_host(obj: Any) -> Any:
+        """Move torch (any device, with grad) and cupy arrays to host numpy; others pass through."""
+        mod = type(obj).__module__.split(".")[0]
+        if mod == "torch":
+            return obj.detach().cpu().numpy()
+        if mod == "cupy":
+            return obj.get()
+        return obj
 
     @staticmethod
     def _is_polars(obj: Any) -> bool:
