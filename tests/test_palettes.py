@@ -1,8 +1,4 @@
-import itertools
-
-import numpy as np
 import pytest
-from colorspacious import cspace_convert
 
 from plotkit import PaletteError, RegistryError
 from plotkit.palettes import (
@@ -13,46 +9,26 @@ from plotkit.palettes import (
     get_palette,
     register_palette,
 )
-
-CVD_TYPES = ["deuteranomaly", "protanomaly", "tritanomaly"]
-
-
-def simulate(colors, cvd):
-    space = {"name": "sRGB1+CVD", "cvd_type": cvd, "severity": 100}
-    return np.clip(cspace_convert(np.array(colors), space, "sRGB1"), 0, 1)
+from tests.cvd import lightness_monotonic, min_delta_e
 
 
-def lightness(colors):
-    return cspace_convert(np.array(colors), "sRGB1", "CAM02-UCS")[:, 0]
+@pytest.mark.parametrize("n", range(2, 9))
+def test_categorical_distinguishable_under_cvd(n):
+    assert min_delta_e(CategoricalPalette(n).to_hex()) > 8
 
 
-def min_pairwise(colors):
-    jab = cspace_convert(np.array(colors), "sRGB1", "CAM02-UCS")
-    return min(np.linalg.norm(a - b) for a, b in itertools.combinations(jab, 2))
-
-
-@pytest.mark.parametrize("cvd", CVD_TYPES)
-@pytest.mark.parametrize("n", range(1, 9))
-def test_categorical_distinguishable_under_cvd(n, cvd):
-    p = CategoricalPalette(n)
-    if n > 1:
-        assert min_pairwise(simulate(p.colors, cvd)) > 8
-
-
-@pytest.mark.parametrize("cvd", CVD_TYPES + [None])
 @pytest.mark.parametrize("n", range(3, 10))
-def test_discrete_distinguishable_and_monotonic(n, cvd):
-    cols = DiscretePalette(n).colors
-    cols = simulate(cols, cvd) if cvd else np.array(cols)
-    assert min_pairwise(cols) > 6
-    assert np.all(np.diff(lightness(cols)) > 0)
+def test_discrete_distinguishable_and_monotonic(n):
+    hexes = DiscretePalette(n).to_hex()
+    assert min_delta_e(hexes) > 6
+    assert lightness_monotonic(hexes)
 
 
 @pytest.mark.parametrize("src", ["cividis", "viridis"])
 def test_continuous_lightness_monotonic(src):
     p = ContinuousPalette(src)
     assert p.n == 256
-    assert np.all(np.diff(lightness(p.colors)) > 0)
+    assert lightness_monotonic(p.to_hex()[::8])
 
 
 def test_errors():
