@@ -32,10 +32,9 @@ def test_axis_title_legend():
     leg = ax.get_legend()
     assert leg.get_frame_on() and leg.get_title().get_text() == "g"
     ax2 = Figure().subplots()
-    LegendStyler().apply(ax2)
-    assert ax2.get_legend() is None
+    assert LegendStyler().apply(ax2) is None
     ax2.plot([0], label="b")
-    LegendStyler(outside=False).apply(ax2)
+    LegendStyler(auto=False, loc="upper left").apply(ax2)
     assert not ax2.get_legend().get_frame_on()
 
 
