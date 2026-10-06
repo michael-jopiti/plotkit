@@ -1,0 +1,27 @@
+
+Screenshot 2026-10-06 at 13.39.45.png
+  #A991BE   42.2%  contrast vs white  2.8:1
+  #FDFDFD   24.8%  contrast vs white  1.0:1
+  #616B52    9.7%  contrast vs white  5.6:1
+  #222822    7.0%  contrast vs white 15.0:1
+  #D4C9D4    6.2%  contrast vs white  1.6:1
+  #E18B34    5.6%  contrast vs white  2.6:1
+  #F8EF39    4.5%  contrast vs white  1.2:1
+
+Screenshot 2026-10-06 at 13.40.19.png
+  #DFDEDD   53.2%  contrast vs white  1.3:1
+  #EFAF51   14.0%  contrast vs white  1.9:1
+  #E9853C   13.1%  contrast vs white  2.7:1
+  #928583    7.0%  contrast vs white  3.6:1
+  #BCB5B9    6.4%  contrast vs white  2.0:1
+  #E2BD9C    6.1%  contrast vs white  1.8:1
+  #151515    0.3%  contrast vs white 18.2:1
+
+Screenshot 2026-10-06 at 13.41.27.png
+  #FAFAF9   22.6%  contrast vs white  1.0:1
+  #9B7DBD   20.0%  contrast vs white  3.5:1
+  #D3CCCE   16.6%  contrast vs white  1.6:1
+  #DECE63   14.9%  contrast vs white  1.6:1
+  #5E5A6D    9.8%  contrast vs white  6.6:1
+  #030303    9.2%  contrast vs white 20.7:1
+  #E46E71    6.9%  contrast vs white  3.1:1

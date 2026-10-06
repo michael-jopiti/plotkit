@@ -10,18 +10,24 @@ from plotkit.palettes.base import Palette
 
 
 class ContinuousPalette(Palette):
-    """Perceptually uniform, CVD-safe colormap (viridis family by default).
+    """Perceptually uniform, CVD-safe colormap (cividis by default).
 
     Parameters
     ----------
     source
-        Name of a matplotlib colormap, e.g. ``"cividis"`` or ``"viridis"``.
+        Name of a matplotlib colormap, or a :class:`~matplotlib.colors.Colormap`.
     n
         Number of samples stored in ``colors``.
+    name
+        Palette name; defaults to the colormap's name.
     """
 
-    def __init__(self, source: str = "cividis", n: int = 256) -> None:
-        super().__init__(source, mpl.colormaps[source](np.linspace(0, 1, n))[:, :3])
+    def __init__(
+        self, source: str | Colormap = "cividis", n: int = 256, name: str | None = None
+    ) -> None:
+        cmap = mpl.colormaps[source] if isinstance(source, str) else source
+        object.__setattr__(self, "_source", cmap)
+        super().__init__(name or cmap.name, cmap(np.linspace(0, 1, n))[:, :3])
 
     def _make_cmap(self) -> Colormap:
-        return mpl.colormaps[self.name]
+        return self._source  # type: ignore[attr-defined, no-any-return]

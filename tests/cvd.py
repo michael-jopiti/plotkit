@@ -40,3 +40,15 @@ def contrast_vs_white(h):
     c = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
     lum = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
     return 1.05 / (lum + 0.05)
+
+
+def contrast(h1, h2):
+    """WCAG contrast ratio between two hex colors."""
+
+    def lum(h):
+        c = _rgb([h])[0]
+        c = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+    hi, lo = sorted((lum(h1), lum(h2)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)

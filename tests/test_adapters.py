@@ -90,7 +90,7 @@ def test_normalize_arrays_positional():
 
 
 def test_normalize_errors():
-    with pytest.raises(DataError, match="not in data"):
+    with pytest.raises(DataError, match="matches no column"):
         DataAdapter.normalize(pd.DataFrame(RAW), x="nope")
     with pytest.raises(DataError, match="no data"):
         DataAdapter.normalize(x="a")

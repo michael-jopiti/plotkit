@@ -6,6 +6,7 @@ never imported: its objects are recognised by duck typing, so polars stays optio
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -92,6 +93,44 @@ class DataAdapter:
             s = pd.Series(arr)
         return s if name is None else s.rename(name)
 
+    @staticmethod
+    def resolve(name: str, columns: Any) -> str:
+        """Match a label like ``"Usage (%)"`` to a column, ignoring case, spaces and unit.
+
+        Raises
+        ------
+        DataError
+            If no single column matches; the message lists the columns.
+        """
+        if name in columns:
+            return name
+
+        def norm(s: Any) -> str:
+            return re.sub(r"\s*\(.*?\)\s*$", "", str(s)).strip().casefold().replace(" ", "_")
+
+        hits = [c for c in columns if norm(c) == norm(name)]
+        if len(hits) == 1:
+            return str(hits[0])
+        raise DataError(
+            f"{name!r} matches no column; columns: {list(columns)} "
+            "(name the column with the x= / y= option)"
+        )
+
+    @classmethod
+    def vector(cls, data: Any, name: str | None = None) -> pd.Series:
+        """One 1-D column: ``data`` itself when it is 1-D, else column ``name`` of a frame.
+
+        Raises
+        ------
+        DataError
+            If ``data`` is a table and ``name`` is not one of its columns.
+        """
+        try:
+            return cls.to_series(data)
+        except DataError:
+            frame = cls.to_frame(data)
+            return frame[cls.resolve(str(name), frame.columns)]
+
     @classmethod
     def normalize(cls, data: Any = None, **roles: Any) -> Normalized:
         """Resolve plot roles into one normalized frame.
@@ -121,9 +160,7 @@ class DataAdapter:
             if isinstance(spec, str):
                 if frame is None:
                     raise DataError(f"{role}={spec!r} is a column name but no data was given")
-                if spec not in frame.columns:
-                    raise DataError(f"{role}={spec!r} not in data; columns: {list(frame.columns)}")
-                series, label = frame[spec], spec
+                series, label = frame[cls.resolve(spec, frame.columns)], spec
             else:
                 series = cls.to_series(spec)
                 label = None if series.name is None else str(series.name)

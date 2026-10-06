@@ -1,6 +1,6 @@
 """Reusable styling components shared by every plot."""
 
-from plotkit.components.axes import AxisFormatter, with_unit
+from plotkit.components.axes import AxisFormatter, format_label, with_unit
 from plotkit.components.colorbar import add_colorbar
 from plotkit.components.layout import Obstacles, text_overlaps
 from plotkit.components.legend import LegendStyler
@@ -19,5 +19,6 @@ __all__ = [
     "LegendStyler",
     "SizePreset",
     "TitleFormatter",
+    "format_label",
     "with_unit",
 ]

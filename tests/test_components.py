@@ -46,3 +46,23 @@ def test_save_figure(tmp_path, dpi):
     assert [f.suffix for f in files] == [".pdf", ".svg", ".png"]
     assert all(f.stat().st_size > 0 for f in files)
     assert b"/FontFile2" in files[0].read_bytes()
+
+
+def test_save_figure_equal_margins(tmp_path):
+    import matplotlib.image as mimg
+    import numpy as np
+
+    fig = Figure(figsize=(3, 2), layout="constrained")
+    fig.get_layout_engine().set(w_pad=0.1, h_pad=0.1)
+    ax = fig.subplots()
+    ax.plot([0, 1], label="a")
+    ax.set_xlabel("x")
+    ax.set_title("t")
+    png = save_figure(fig, tmp_path / "m", formats=("png",), pad_inches=0.15)[0]
+    img = mimg.imread(png)[..., :3]
+    ink = (np.abs(img - img[0, 0]) > 2 / 255).any(-1)
+    r, c = np.flatnonzero(ink.any(1)), np.flatnonzero(ink.any(0))
+    h, w = ink.shape
+    margins = [c[0], w - 1 - c[-1], r[0], h - 1 - r[-1]]
+    assert max(margins) - min(margins) <= 1
+    assert abs(margins[0] - 0.15 * 300) <= 1

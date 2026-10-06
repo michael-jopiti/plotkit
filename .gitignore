@@ -218,3 +218,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# user-supplied reference screenshots (not redistributed)
+design/references/

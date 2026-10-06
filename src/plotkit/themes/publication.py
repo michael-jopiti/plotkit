@@ -61,7 +61,6 @@ class PublicationTheme(Theme):
             "figure.constrained_layout.w_pad": p.layout_pad,
             "savefig.dpi": 300,
             "savefig.bbox": "tight",
-            "savefig.pad_inches": p.layout_pad,
             "font.family": "sans-serif",
             "font.sans-serif": [
                 "Helvetica",

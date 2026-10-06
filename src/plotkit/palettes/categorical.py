@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from matplotlib.colors import Colormap, ListedColormap
 
 from plotkit.exceptions import PaletteError
@@ -20,26 +22,36 @@ OKABE_ITO = (
 
 
 class CategoricalPalette(Palette):
-    """Up to 8 distinguishable unordered colors (Okabe-Ito).
+    """Up to 8 distinguishable unordered colors (Okabe-Ito by default).
 
     Parameters
     ----------
     n
-        Number of categories, 1 to 8.
+        Number of categories, 1 to ``len(colors)``. Defaults to all of them.
+    colors
+        Source colors, in priority order.
+    name
+        Palette name prefix.
 
     Raises
     ------
     PaletteError
-        If ``n`` exceeds 8: more colors cannot stay distinguishable.
+        If ``n`` exceeds the available colors: more cannot stay distinguishable.
     """
 
-    def __init__(self, n: int = 8) -> None:
-        if not 1 <= n <= len(OKABE_ITO):
+    def __init__(
+        self,
+        n: int | None = None,
+        colors: Sequence[str] = OKABE_ITO,
+        name: str = "okabe-ito",
+    ) -> None:
+        n = len(colors) if n is None else n
+        if not 1 <= n <= len(colors):
             raise PaletteError(
-                f"CategoricalPalette supports 1 to {len(OKABE_ITO)} categories, got {n}; "
+                f"CategoricalPalette supports 1 to {len(colors)} categories, got {n}; "
                 "group rare categories or use markers/facets instead"
             )
-        super().__init__(f"okabe-ito-{n}", OKABE_ITO[:n])
+        super().__init__(f"{name}-{n}", colors[:n])
 
     def _make_cmap(self) -> Colormap:
         return ListedColormap(list(self.colors), name=self.name)

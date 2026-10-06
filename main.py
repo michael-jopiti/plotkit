@@ -1,77 +1,51 @@
-"""Smoke test: one figure per palette type (continuous, discrete, categorical)."""
+"""Gallery: one call per plot. Usage: ``uv run python main.py [editorial|cobalt]``."""
 
-import matplotlib
+import sys
 
-matplotlib.use("Agg")
-import numpy as np
-from matplotlib.figure import Figure
+import plotkit
+from plotkit import synthetic as syn
 
-from plotkit.components import (
-    SINGLE_COLUMN,
-    AxisFormatter,
-    LegendStyler,
-    TitleFormatter,
-    add_colorbar,
-    text_overlaps,
+kw = {"style": sys.argv[1] if len(sys.argv) > 1 else "editorial"}
+out = f"examples/output/{kw['style']}"
+
+
+def show(name, result):
+    print(f"{name}: overlaps {result.overlaps()}")
+    result.save(f"{out}/{name}")
+
+
+gauss = syn.gaussian(2, 0.5)
+show("gaussian", plotkit.continuous("Value (a.u.)", "Density", "Gaussian", gauss, **kw))
+show("boxplot", plotkit.boxplot("Group", "Value (a.u.)", "Quantiles", syn.groups(), **kw))
+show(
+    "barplot",
+    plotkit.bar("Region", "Usage (%)", "Region usage", syn.region_usage(), hue="condition", **kw),
 )
-from plotkit.io import save_figure
-from plotkit.palettes import get_palette
-from plotkit.themes import get_theme
-
-rng = np.random.default_rng(0)
-OUT = "examples/output"
-
-
-def continuous():
-    x, y = rng.uniform(-3, 3, (2, 400))
-    z = np.exp(-(x**2 + y**2) / 4) * np.cos(2 * x)
-    fig = Figure(figsize=SINGLE_COLUMN.figsize())
-    ax = fig.subplots()
-    sc = ax.scatter(x, y, c=z, cmap=get_palette("continuous").cmap, s=12)
-    add_colorbar(ax, sc, r"$f(x, y)$ (a.u.)")
-    AxisFormatter("x", "y", "mm", "mm").apply(ax)
-    TitleFormatter("Continuous: cividis").apply(ax)
-    return fig
-
-
-def discrete():
-    doses = [0.1, 1, 10, 100, 1000]
-    pal = get_palette("discrete", len(doses))
-    styles = ["-", "--", "-.", ":", (0, (5, 1))]
-    t = np.linspace(0, 10, 100)
-    fig = Figure(figsize=SINGLE_COLUMN.figsize())
-    ax = fig.subplots()
-    for dose, color, ls in zip(doses, pal.colors, styles):
-        ax.plot(t, 1 - np.exp(-t * dose**0.4 / 10), color=color, ls=ls, label=f"{dose:g}")
-    AxisFormatter("Time", "Response", "h", "norm.").apply(ax)
-    TitleFormatter("Discrete (ordered): dose").apply(ax)
-    LegendStyler(title="Dose (nM)").apply(ax)
-    return fig
-
-
-def categorical():
-    groups = ["A", "B", "C", "D"]
-    pal = get_palette("categorical", len(groups))
-    markers = ["o", "s", "^", "D"]
-    fig = Figure(figsize=SINGLE_COLUMN.figsize())
-    ax = fig.subplots()
-    for i, (g, color, m) in enumerate(zip(groups, pal.colors, markers)):
-        x = rng.normal(i * 1.5, 0.7, 30)
-        y = rng.normal(i * 0.8, 0.7, 30)
-        ax.scatter(x, y, color=color, marker=m, s=14, label=g)
-    AxisFormatter("PC1", "PC2").apply(ax)
-    TitleFormatter("Categorical: Okabe-Ito").apply(ax)
-    LegendStyler(title="Group").apply(ax)
-    return fig
-
-
-with get_theme("publication").context():
-    for name, make in [
-        ("continuous", continuous),
-        ("discrete", discrete),
-        ("categorical", categorical),
-    ]:
-        fig = make()
-        print(name, "text overlaps:", text_overlaps(fig))
-        save_figure(fig, f"{OUT}/main_{name}")
-        print("saved", name)
+show("pca", plotkit.dim_red("PC1", "PC2", "PCA", syn.expression(), hue="group", method="pca", **kw))
+show(
+    "umap",
+    plotkit.dim_red(
+        "UMAP1", "UMAP2", "UMAP", syn.single_cells(), hue="cell_type", method="umap", **kw
+    ),
+)
+show(
+    "volcano",
+    plotkit.volcano("log2 fold change", "-log10 p", "Volcano", syn.differential_expression(), **kw),
+)
+show(
+    "survival",
+    plotkit.survival(
+        "Time (months)", "Survival probability", "Survival", syn.survival_data(), **kw
+    ),
+)
+show("heatmap", plotkit.heatmap("Samples", "Genes", "Expression", syn.expression_matrix(), **kw))
+show(
+    "dose_response",
+    plotkit.line(
+        "Time (h)", "Response", "Dose response", syn.dose_response(), hue="dose", ordered=True, **kw
+    ),
+)
+show(
+    "scatter",
+    plotkit.scatter("gene_0", "gene_1", "Scatter", syn.expression(), color="gene_2", **kw),
+)
