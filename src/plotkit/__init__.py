@@ -5,6 +5,8 @@
 >>> plotkit.continuous("Value (a.u.)", "Density", "Gaussian distribution", data).save("fig")
 """
 
+from importlib.metadata import PackageNotFoundError, version
+
 from plotkit import synthetic
 from plotkit.api import (
     bar,
@@ -29,7 +31,11 @@ from plotkit.io import save_figure
 from plotkit.plots import BasePlot, PlotResult, register_plot
 from plotkit.themes import Variant, register_variant
 
-__version__ = "0.1.0"
+try:
+    __version__ = version("plotkit")
+except PackageNotFoundError:  # running from an uninstalled source tree
+    __version__ = "0+unknown"
+
 __all__ = [
     "BasePlot",
     "DataError",

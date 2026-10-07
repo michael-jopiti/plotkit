@@ -39,7 +39,7 @@ cd plotkit
 uv sync --extra polars          # or: pip install -e ".[polars]"
 ```
 
-Python 3.10 or newer. Required: `matplotlib>=3.9`, `seaborn`, `pandas`, `numpy`.
+Python 3.10 or newer. Required: `matplotlib>=3.9`, `pandas`, `numpy`.
 
 | Extra | Adds | For |
 |---|---|---|

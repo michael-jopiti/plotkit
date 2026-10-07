@@ -250,3 +250,27 @@ def test_save_keeps_dots_in_name(tmp_path):
 def test_no_overlap_across_styles_and_sizes(name, opts):
     kind, args, kw = CASES[name]()
     assert plotkit.plot(kind, *args, **kw, **opts).overlaps() == []
+
+
+@pytest.mark.parametrize(
+    "kind",
+    (
+        "continuous",
+        "boxplot",
+        "bar",
+        "scatter",
+        "line",
+        "dim_red",
+        "survival",
+        "volcano",
+        "heatmap",
+    ),
+)
+def test_api_signature_matches_plot_defaults(kind):
+    import inspect
+
+    from plotkit.plots import plots
+
+    params = inspect.signature(getattr(plotkit, kind)).parameters
+    explicit = {n: p.default for n, p in params.items() if p.kind is p.KEYWORD_ONLY}
+    assert explicit == plots.get(kind).defaults
