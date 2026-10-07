@@ -30,9 +30,12 @@ def frames():
 
 
 def test_frame_parity():
-    ref = DataAdapter.to_frame(pd.DataFrame(RAW))
+    def norm(df):  # datetime unit differs across pandas versions (ns vs us)
+        return df.assign(t=df["t"].astype("datetime64[ns]"))
+
+    ref = norm(DataAdapter.to_frame(pd.DataFrame(RAW)))
     for name in ("polars", "lazy"):
-        pdt.assert_frame_equal(DataAdapter.to_frame(frames()[name]), ref, obj=name)
+        pdt.assert_frame_equal(norm(DataAdapter.to_frame(frames()[name])), ref, obj=name)
 
 
 def test_categorical_polars_becomes_strings():
