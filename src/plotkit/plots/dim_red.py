@@ -78,6 +78,8 @@ class DimRedPlot(BasePlot):
                 d = DataAdapter.normalize(frame, x=self.xcol, y=self.ycol, hue=hue).frame
             return add_alpha(d, alpha, frame)
         frame = DataAdapter.to_frame(self.data)
+        if hue is not None and not isinstance(hue, str):
+            raise DataError("with method set, hue must be a column name of data")
         skip = [c for c in (hue, alpha) if isinstance(c, str)]
         feats = frame.drop(columns=skip).select_dtypes("number")
         if feats.shape[1] < 2:
@@ -92,7 +94,7 @@ class DimRedPlot(BasePlot):
         else:
             raise DataError(f"method must be None, 'pca' or 'umap', got {method!r}")
         out = pd.DataFrame({"x": emb[:, 0], "y": emb[:, 1]})
-        if hue:
+        if hue is not None:
             out["hue"] = frame[hue].to_numpy()
         return add_alpha(out, alpha, frame)
 

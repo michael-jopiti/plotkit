@@ -120,6 +120,8 @@ class BasePlot(ABC):
         caption: str | None = None,
         **options: Any,
     ) -> None:
+        if isinstance(size, str) and size not in _SIZES:
+            raise ValueError(f"size must be one of {sorted(_SIZES)} or (w, h); got {size!r}")
         unknown = set(options) - set(self.defaults)
         if unknown:
             raise TypeError(

@@ -11,6 +11,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.transforms import Bbox
 
+_SUFFIXES = {".pdf", ".svg", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".eps", ".ps", ".webp"}
 _FONTS = {"pdf.fonttype": 42, "ps.fonttype": 42, "svg.fonttype": "path"}
 
 
@@ -44,7 +45,10 @@ def save_figure(
     dpi: int = 300,
     pad_inches: float = 0.15,
 ) -> list[Path]:
-    """Save ``fig`` once per format, replacing any suffix of ``path``.
+    """Save ``fig`` once per format, replacing a trailing image suffix of ``path``.
+
+    ``"out/fig.png"`` and ``"out/fig"`` both write ``out/fig.<fmt>``; any other dot
+    (``"out/fig_0.5"``) is part of the name and is kept.
 
     The output is cropped to the drawn ink and padded by ``pad_inches`` on all four
     sides, so the figure sits exactly centered in the image. PDF embeds TrueType
@@ -57,12 +61,14 @@ def save_figure(
         Written files.
     """
     base = Path(path)
+    if base.suffix.lower() in _SUFFIXES:
+        base = base.with_suffix("")
     base.parent.mkdir(parents=True, exist_ok=True)
     out = []
     with mpl.rc_context(_FONTS):  # type: ignore[arg-type]
         box = _ink_bbox(fig, pad_inches)
         for fmt in formats:
-            target = base.with_suffix(f".{fmt}")
+            target = base.with_name(f"{base.name}.{fmt}")
             fig.savefig(target, format=fmt, dpi=dpi, bbox_inches=box)
             out.append(target)
     return out

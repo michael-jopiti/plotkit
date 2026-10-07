@@ -7,6 +7,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 
 from plotkit.data import DataAdapter
+from plotkit.exceptions import DataError
 from plotkit.plots.base import BasePlot
 from plotkit.plots.registry import register_plot
 
@@ -36,6 +37,8 @@ class SurvivalPlot(BasePlot):
         o = self.opt
         frame = DataAdapter.to_frame(self.data)
         group = o["group"] if o["group"] in frame.columns else None
+        if group is None and o["group"] != self.defaults["group"]:
+            raise DataError(f"group column {o['group']!r} not found in {list(frame.columns)}")
         d = DataAdapter.normalize(frame, t=o["time"], e=o["event"], g=group).frame
         if "g" not in d:
             d["g"] = ""

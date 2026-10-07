@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pytest
 
 import plotkit
@@ -216,3 +217,36 @@ def test_marginals_need_a_subplot():
         plotkit.scatter(
             "gene_0", "gene_1", "T", syn.expression(), ax=fig.add_axes([0, 0, 1, 1]), marginals=True
         )
+
+
+def test_option_validation():
+    data = syn.groups(5)
+    with pytest.raises(ValueError, match="size"):
+        plotkit.boxplot("Group", "Value", "T", data, size="triple")
+    with pytest.raises(plotkit.DataError, match="error"):
+        plotkit.bar("Region", "Usage", "T", syn.region_usage(), error="se")
+    with pytest.raises(plotkit.DataError, match="order"):
+        plotkit.boxplot("Group", "Value", "T", data, order=["nope"])
+    with pytest.raises(plotkit.DataError, match="group column"):
+        plotkit.survival("t", "s", "T", syn.survival_data(), group="grp")
+    with pytest.raises(plotkit.DataError, match="hue"):
+        plotkit.dim_red("a", "b", "T", syn.expression(), method="pca", hue=[0, 1])
+
+
+def test_heatmap_constant_row_is_finite():
+    df = pd.DataFrame({"gene": ["a", "b"], "s1": [1.0, 3.0], "s2": [1.0, 4.0], "s3": [1.0, 5.0]})
+    res = plotkit.heatmap("Sample", "Gene", "T", df)
+    assert np.isfinite(res.ax.images[0].get_array()).all()
+
+
+def test_save_keeps_dots_in_name(tmp_path):
+    res = plotkit.continuous("x", "y", "T", syn.gaussian())
+    assert res.save(tmp_path / "fig_0.5", formats=("png",))[0].name == "fig_0.5.png"
+    assert res.save(tmp_path / "fig.png", formats=("png",))[0].name == "fig.png"
+
+
+@pytest.mark.parametrize("name", CASES)
+@pytest.mark.parametrize("opts", [{"style": "cobalt"}, {"size": "double"}])
+def test_no_overlap_across_styles_and_sizes(name, opts):
+    kind, args, kw = CASES[name]()
+    assert plotkit.plot(kind, *args, **kw, **opts).overlaps() == []

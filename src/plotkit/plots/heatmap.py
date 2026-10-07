@@ -48,7 +48,8 @@ class HeatmapPlot(BasePlot):
         """Cells, tick labels and colorbar."""
         z = m.to_numpy(dtype=float)
         if self.opt["zscore"]:
-            z = (z - z.mean(1, keepdims=True)) / z.std(1, keepdims=True)
+            sd = z.std(1, keepdims=True)
+            z = (z - z.mean(1, keepdims=True)) / np.where(sd > 0, sd, 1.0)  # constant row -> 0
         vmin, vmax = (-2.0, 2.0) if self.opt["zscore"] else (None, None)
         cmap = self.v.continuous().cmap
         im = ax.imshow(z, cmap=cmap, aspect="auto", interpolation="nearest", vmin=vmin, vmax=vmax)

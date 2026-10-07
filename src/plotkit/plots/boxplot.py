@@ -8,6 +8,7 @@ import numpy as np
 from matplotlib.axes import Axes
 
 from plotkit.data import DataAdapter
+from plotkit.exceptions import DataError
 from plotkit.plots.base import BasePlot
 from plotkit.plots.registry import register_plot
 
@@ -31,6 +32,9 @@ class BoxPlot(BasePlot):
             d = DataAdapter.normalize(self.data, x=self.xcol, y=self.ycol).frame
             groups = {str(k): g["y"].to_numpy(dtype=float) for k, g in d.groupby("x", sort=False)}
         order = self.opt["order"] or list(groups)
+        missing = [str(k) for k in order if str(k) not in groups]
+        if missing:
+            raise DataError(f"order has groups not in the data: {missing}; groups: {list(groups)}")
         return {str(k): groups[str(k)] for k in order}
 
     def draw(self, ax: Axes, groups: dict[str, np.ndarray]) -> None:

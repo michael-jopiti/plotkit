@@ -7,6 +7,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 
 from plotkit.data import DataAdapter
+from plotkit.exceptions import DataError
 from plotkit.plots.base import BasePlot
 from plotkit.plots.registry import register_plot
 
@@ -25,6 +26,8 @@ class BarPlot(BasePlot):
 
     def prepare_data(self) -> pd.DataFrame:
         """Columns ``x``, ``y`` and ``hue`` (constant when no hue)."""
+        if self.opt["error"] not in ("sd", "sem", None):
+            raise DataError(f"error must be 'sd', 'sem' or None, got {self.opt['error']!r}")
         d = DataAdapter.normalize(self.data, x=self.xcol, y=self.ycol, hue=self.opt["hue"]).frame
         if "hue" not in d:
             d["hue"] = ""
