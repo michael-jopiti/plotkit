@@ -132,10 +132,10 @@ The data in the gallery is synthetic (`plotkit.synthetic`). The UMAP clusters ar
 | `continuous` | 1-D values (list, array, Series), or a table whose column matches `x_name` | `bins=40`, `fit="kde"` (`"kde"`, `"normal"`, `None`) |
 | `boxplot` | table with a group column and a value column, or `{group: values}` | `order=None`, `points=False` |
 | `bar` | table with a category column and a value column | `hue=None`, `error="sd"` (`"sd"`, `"sem"`, `None`), `points=True` |
-| `scatter` | table with x and y columns | `hue=None` (category), `color=None` (numeric column, gradient + colorbar), `s=14`, `marginals=False` (`True`: a KDE per hue level above and beside the axes) |
+| `scatter` | table with x and y columns | `hue=None` (category), `color=None` (numeric column, gradient + colorbar), `s=14`, `alpha=None` (number, column name, per-point array or `f(x, y)`), `marginals=False` (`True`: a KDE per hue level above and beside the axes) |
 | `line` | table with x and y columns | `hue=None`, `ordered=False` (ordinal hue such as dose), `markers=False` |
-| `dim_red` | coordinate columns, or a feature table when `method` is set | `hue=None`, `method=None` (`"pca"`, `"umap"`), `n_neighbors=15`, `min_dist=0.3`, `seed=0`, `s=10`, `marginals=False` (as in `scatter`; drops the equal-scale rule) |
-| `survival` | table with time, event (1 = event, 0 = censored) and group columns | `time="time"`, `event="event"`, `group="group"` (missing group column gives one curve) |
+| `dim_red` | coordinate columns, or a feature table when `method` is set | `hue=None` (a column name; with `method` set it must be one), `method=None` (`"pca"`, `"umap"`), `n_neighbors=15`, `min_dist=0.3`, `seed=0`, `s=10`, `alpha=None` (as in `scatter`), `marginals=False` (as in `scatter`; drops the equal-scale rule) |
+| `survival` | table with time, event (1 = event, 0 = censored) and group columns | `time="time"`, `event="event"`, `group="group"` (a missing default group column gives one curve; a group column you name that does not exist raises `DataError`) |
 | `volcano` | table with log2 fold change and p-value columns | `lfc="log2fc"`, `p="pvalue"`, `lfc_cut=1.0`, `p_cut=0.01` |
 | `heatmap` | wide table: rows are features, columns are samples, optional leading label column | `zscore=True`, `cbar_label=None` |
 
@@ -152,7 +152,7 @@ Options common to every call:
 | `caption` | note centered below the whole figure, wrapped to its width; off by default |
 | `save` | path without suffix; writes PDF, SVG and PNG |
 
-Unknown options raise `TypeError` and list the valid ones. Groups and categories use the categorical palette, which holds at most 5 colours; more raises `PaletteError` (group rare categories or use facets).
+Every function has explicit, typed keyword-only options, so editors complete them and mypy checks them; an unknown option raises `TypeError`. Bad option values (`error="se"`, `order=["nope"]`, `size="triple"`) raise `DataError` or `ValueError` naming the valid choices. Groups and categories use the categorical palette, which holds at most 5 colours; more raises `PaletteError` (group rare categories or use facets).
 
 `plotkit.synthetic` provides demo data for every plot: `gaussian`, `groups`, `region_usage`, `expression`, `single_cells`, `differential_expression`, `survival_data`, `expression_matrix`, `dose_response`.
 
@@ -197,7 +197,7 @@ result.ax.set_xlim(-5, 5)  # keep customizing with matplotlib
 result.save("out/scatter")  # PDF, SVG, PNG
 ```
 
-`save` crops to the drawn content and pads exactly 0.15 in on every side. PDF embeds TrueType fonts (type 42). SVG stores text as paths, so it renders the same everywhere but the text is not editable. For lower-level control, use `plotkit.save_figure(fig, path, formats=("pdf", "png"), dpi=600, pad_inches=0.2)`.
+`save` crops to the drawn content and pads exactly 0.15 in on every side. A trailing image suffix in the path is replaced (`"out/fig.png"` and `"out/fig"` are the same); other dots stay in the name (`"out/fig_0.5"` writes `fig_0.5.pdf`). PDF embeds TrueType fonts (type 42). SVG stores text as paths, so it renders the same everywhere but the text is not editable. For lower-level control, use `plotkit.save_figure(fig, path, formats=("pdf", "png"), dpi=600, pad_inches=0.2)`.
 
 Fonts are resolved when a figure is drawn, so draw and save inside the plot's theme. `result.save()`, `result.overlaps()` and `result.to_array()` do this for you. If you call `result.fig.savefig(...)` yourself, wrap it:
 
@@ -295,7 +295,7 @@ Layout:
 
 ```
 src/plotkit/
-  api.py            one-call functions
+  api.py            one-call functions (typed signatures; kept in sync with each plot's `defaults` by a test)
   plots/            BasePlot template, one file per plot, registry
   palettes/         continuous, discrete, categorical + registry
   themes/           PublicationTheme, styles (Variant), built-in editorial and cobalt
@@ -311,7 +311,7 @@ Contribution guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md); conventions f
 
 ## Limitations
 
-- Tested on Python 3.13 only so far. CI is configured for 3.10 to 3.13 but has not run (nothing is pushed yet).
+- CI runs lint, format and mypy on Python 3.12 and the tests on 3.10 to 3.13, with a 90% coverage floor. plotkit supports pandas 2 and 3; tests compare datetimes at nanosecond resolution because the default unit differs between them.
 - Real Helvetica and `usetex` rendering are untested on this machine (no TeX install; Nimbus Sans stands in for Helvetica). `usetex` is off by default and raises `ThemeError` with a clear message when TeX is missing.
 - If text overhangs the canvas because of unusually small layout padding, the cropped output can have a slightly smaller right margin than the other sides.
 - The `editorial` and `cobalt` styles are validated for categorical palettes of up to 5 colours and discrete palettes of 3 to 9 steps.
