@@ -72,9 +72,9 @@ Each call returns a `PlotResult`:
 
 ```python
 result = plotkit.boxplot("Group", "Value", "Quantiles", syn.groups())
-result.fig, result.ax          # matplotlib objects, keep customizing
-result.overlaps()              # [] when no text elements collide
-result.save("out/boxplot")     # PDF + SVG + PNG
+result.fig, result.ax  # matplotlib objects, keep customizing
+result.overlaps()  # [] when no text elements collide
+result.save("out/boxplot")  # PDF + SVG + PNG
 ```
 
 In a Jupyter notebook, `plotkit.<kind>(...)` returns the result; use `result.fig` to display it.
@@ -84,14 +84,16 @@ Pass your own data instead of `plotkit.synthetic`:
 ```python
 import pandas as pd
 
-df = pd.read_csv("usage.csv")   # columns: region, condition, usage
+df = pd.read_csv("usage.csv")  # columns: region, condition, usage
 plotkit.bar("Region", "Usage (%)", "Region usage", df, hue="condition", save="figures/usage")
 ```
 
 Axis labels are free text and may carry units (`"Time (s)"`). plotkit matches them to column names ignoring case, spaces and the unit, so `"Usage (%)"` finds the column `usage`. When a label does not match a column, name the column explicitly with `x=` and `y=`:
 
 ```python
-plotkit.bar("Transcript region", "Usage (%)", "Region usage", df, x="region", y="usage", hue="condition")
+plotkit.bar(
+    "Transcript region", "Usage (%)", "Region usage", df, x="region", y="usage", hue="condition"
+)
 ```
 
 ## Gallery
@@ -191,8 +193,8 @@ Polars `Categorical` columns arrive as plain strings, so category order is not p
 ```python
 result = plotkit.scatter("gene_0", "gene_1", "Scatter", syn.expression(), hue="group")
 
-result.ax.set_xlim(-5, 5)                  # keep customizing with matplotlib
-result.save("out/scatter")                  # PDF, SVG, PNG
+result.ax.set_xlim(-5, 5)  # keep customizing with matplotlib
+result.save("out/scatter")  # PDF, SVG, PNG
 ```
 
 `save` crops to the drawn content and pads exactly 0.15 in on every side. PDF embeds TrueType fonts (type 42). SVG stores text as paths, so it renders the same everywhere but the text is not editable. For lower-level control, use `plotkit.save_figure(fig, path, formats=("pdf", "png"), dpi=600, pad_inches=0.2)`.
@@ -216,6 +218,7 @@ Legends are placed automatically: plotkit tests every inside position against th
 import plotkit
 from plotkit.data import DataAdapter
 
+
 @plotkit.register_plot("lollipop")
 class Lollipop(plotkit.BasePlot):
     def prepare_data(self):
@@ -224,6 +227,7 @@ class Lollipop(plotkit.BasePlot):
     def draw(self, ax, d):
         ax.vlines(d["x"], 0, d["y"], color=self.v.fg, lw=self.v.hairline)
         ax.scatter(d["x"], d["y"], color=self.v.categorical(1).colors[0], zorder=3)
+
 
 plotkit.plot("lollipop", "Gene", "Score", "Top genes", df, x="gene", y="score")
 ```
@@ -239,7 +243,7 @@ mine = plotkit.Variant(
     fg="#0E1A16",
     muted="#46544E",
     categorical_hex=("#0B6E4F", "#C2410C", "#5B21B6", "#8A6D00", "#1C1C1C"),
-    gradient_hex=("#10251D", "#0B6E4F", "#6FCF97", "#E8F6EE"),   # dark to light
+    gradient_hex=("#10251D", "#0B6E4F", "#6FCF97", "#E8F6EE"),  # dark to light
 )
 plotkit.register_variant(mine)
 
