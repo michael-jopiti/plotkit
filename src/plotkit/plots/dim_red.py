@@ -98,19 +98,30 @@ class DimRedPlot(BasePlot):
         v, s = self.v, self.opt["s"]
         levels = list(dict.fromkeys(d["hue"])) if "hue" in d else [None]
         pal = v.categorical(len(levels))
+        # ponytail: K random chunks per level, drawn round-robin, so no level sits wholly on top
+        k = 20
+        rng = np.random.default_rng(self.opt["seed"])
+        parts = []
         for lvl, color, m in zip(levels, pal.colors, MARKERS, strict=False):
             sub = d if lvl is None else d[d["hue"] == lvl]
-            ax.scatter(
-                sub["x"],
-                sub["y"],
-                s=s,
-                color=color,
-                marker=m,
-                edgecolors=v.bg,
-                linewidths=0.2,
-                label=None if lvl is None else str(lvl),
-                alpha=point_alpha(sub),
-            )
+            chunks = np.array_split(rng.permutation(len(sub)), k)
+            parts.append((lvl, color, m, sub, chunks))
+        for c in range(k):
+            for lvl, color, m, sub, chunks in parts:
+                if not len(chunks[c]):
+                    continue
+                part = sub.iloc[chunks[c]]
+                ax.scatter(
+                    part["x"],
+                    part["y"],
+                    s=s,
+                    color=color,
+                    marker=m,
+                    edgecolors=v.bg,
+                    linewidths=0.2,
+                    label=None if lvl is None or len(part) == 0 or c else str(lvl),
+                    alpha=point_alpha(part),
+                )
 
     def finalize(self, ax: Axes) -> None:
         """Equal scale on both axes, so distances are comparable."""
