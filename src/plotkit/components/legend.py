@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import cast
 
 from matplotlib.axes import Axes
+from matplotlib.collections import Collection
 from matplotlib.figure import Figure
 from matplotlib.legend import Legend
 from matplotlib.transforms import Bbox
@@ -66,6 +67,9 @@ class LegendStyler:
                 frameon=self.frame,
                 alignment="left",
             )
+            for h in leg.legend_handles:  # swatches ignore per-point alpha of the data
+                if isinstance(h, Collection):
+                    h.set_alpha([1.0])
             if self.frame:
                 leg.get_frame().set_linewidth(ax.spines["left"].get_linewidth())
             return leg
