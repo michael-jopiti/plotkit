@@ -164,3 +164,17 @@ def test_import_leaves_pyplot_unloaded():
 
     code = "import sys, plotkit; assert 'matplotlib.pyplot' not in sys.modules"
     subprocess.run([sys.executable, "-c", code], check=True)
+
+
+def test_alpha_option():
+    emb = np.random.default_rng(0).normal(size=(30, 2))
+    lab = ["a", "b", "c"] * 10
+    per_point = np.linspace(0.1, 1, 30)
+    for alpha in (0.3, per_point, lambda x, y: np.clip(np.hypot(x, y) / 3, 0, 1)):
+        res = plotkit.dim_red("D1", "D2", "T", emb, hue=lab, alpha=alpha)
+        assert res.ax.collections[0].get_alpha() is not None
+    df = syn.expression(20).assign(a=np.linspace(0.1, 1, 60))
+    res = plotkit.scatter("gene_0", "gene_1", "T", df, hue="group", alpha="a")
+    assert sum(len(c.get_alpha()) for c in res.ax.collections) == 60
+    with pytest.raises(plotkit.exceptions.DataError):
+        plotkit.dim_red("D1", "D2", "T", emb, alpha=[0.5] * 3)

@@ -10,7 +10,7 @@ from plotkit.data import DataAdapter
 from plotkit.exceptions import DataError
 from plotkit.plots.base import BasePlot
 from plotkit.plots.registry import register_plot
-from plotkit.plots.scatter import MARKERS
+from plotkit.plots.scatter import MARKERS, add_alpha, point_alpha
 
 
 def pca(features: np.ndarray, n: int = 2) -> tuple[np.ndarray, np.ndarray]:
@@ -47,24 +47,36 @@ class DimRedPlot(BasePlot):
     labels (PCA appends the explained variance, e.g. ``PC1 (53%)``).
 
     Options: ``hue=None``, ``method=None``, ``n_neighbors=15``, ``min_dist=0.3``, ``seed=0``,
-    ``s=10``.
+    ``s=10``, ``alpha=None`` (opacity in [0, 1]: a number, a column name, an array with one
+    value per point, or a callable ``f(x, y) -> array`` of the embedding coordinates).
     """
 
     aspect = 1.15
-    defaults = {"hue": None, "method": None, "n_neighbors": 15, "min_dist": 0.3, "seed": 0, "s": 10}
+    defaults = {
+        "hue": None,
+        "method": None,
+        "n_neighbors": 15,
+        "min_dist": 0.3,
+        "seed": 0,
+        "s": 10,
+        "alpha": None,
+    }
 
     def prepare_data(self) -> pd.DataFrame:
-        """Columns ``x``, ``y`` and optionally ``hue``."""
-        hue, method = self.opt["hue"], self.opt["method"]
+        """Columns ``x``, ``y`` and optionally ``hue`` / ``alpha``."""
+        hue, method, alpha = self.opt["hue"], self.opt["method"], self.opt["alpha"]
         if method is None:
             frame = DataAdapter.to_frame(self.data)
             if isinstance(frame.columns, pd.RangeIndex):  # unnamed array: first two columns
                 if frame.shape[1] < 2:
                     raise DataError("embedding needs at least 2 columns")
-                return DataAdapter.normalize(None, x=frame[0], y=frame[1], hue=hue).frame
-            return DataAdapter.normalize(frame, x=self.xcol, y=self.ycol, hue=hue).frame
+                d = DataAdapter.normalize(None, x=frame[0], y=frame[1], hue=hue).frame
+            else:
+                d = DataAdapter.normalize(frame, x=self.xcol, y=self.ycol, hue=hue).frame
+            return add_alpha(d, alpha, frame)
         frame = DataAdapter.to_frame(self.data)
-        feats = frame.drop(columns=[hue] if hue else []).select_dtypes("number")
+        skip = [c for c in (hue, alpha) if isinstance(c, str)]
+        feats = frame.drop(columns=skip).select_dtypes("number")
         if feats.shape[1] < 2:
             raise DataError("method needs at least 2 numeric feature columns")
         x = feats.to_numpy(dtype=float)
@@ -79,7 +91,7 @@ class DimRedPlot(BasePlot):
         out = pd.DataFrame({"x": emb[:, 0], "y": emb[:, 1]})
         if hue:
             out["hue"] = frame[hue].to_numpy()
-        return out
+        return add_alpha(out, alpha, frame)
 
     def draw(self, ax: Axes, d: pd.DataFrame) -> None:
         """One color and marker shape per hue level."""
@@ -97,6 +109,7 @@ class DimRedPlot(BasePlot):
                 edgecolors=v.bg,
                 linewidths=0.2,
                 label=None if lvl is None else str(lvl),
+                alpha=point_alpha(sub),
             )
 
     def finalize(self, ax: Axes) -> None:

@@ -60,7 +60,8 @@ def scatter(
 ) -> PlotResult:
     """Scatter of columns ``x_name`` and ``y_name``.
 
-    Options: ``hue=None`` (category column), ``color=None`` (numeric column, gradient), ``s=14``.
+    Options: ``hue=None`` (category column), ``color=None`` (numeric column, gradient), ``s=14``,
+    ``alpha=None`` (number, column name, per-point array, or ``f(x, y) -> array``).
     """
     return plot("scatter", x_name, y_name, title, data, **options)
 
@@ -83,7 +84,8 @@ def dim_red(
     ``method=None``: ``data`` has coordinate columns ``x_name`` and ``y_name``.
     ``method="pca"|"umap"``: ``data`` has feature columns and the embedding is computed for you.
     Options: ``hue=None``, ``method=None``, ``n_neighbors=15``, ``min_dist=0.3``,
-    ``seed=0``, ``s=10``.
+    ``seed=0``, ``s=10``, ``alpha=None`` (number, column name, per-point array, or
+    ``f(x, y) -> array`` of the embedding coordinates).
     """
     return plot("dim_red", x_name, y_name, title, data, **options)
 
