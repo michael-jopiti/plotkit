@@ -102,11 +102,6 @@ class Proportions:
         return self.tick
 
     @property
-    def caption_gap(self) -> float:
-        """Gap between the figure content and the caption (pt)."""
-        return round(self.base * 1.0, 1)
-
-    @property
     def marker(self) -> float:
         """Marker size (pt)."""
         return round(self.base * 0.5, 1)

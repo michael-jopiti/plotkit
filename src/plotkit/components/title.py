@@ -103,16 +103,13 @@ def _wrap(fig: Figure, text: str, size: float, width_pt: float) -> str:
 def add_caption(fig: Figure, text: str, props: Proportions, color: str | None = None) -> None:
     """Centered caption below the whole figure; constrained layout reserves its space.
 
-    The gap to the content above is ``props.caption_gap``, applied through the layout engine
-    (needs constrained layout, which every plotkit figure has).
+    A blank first line holds the gap to the content above (one caption line, about 1.2 em),
+    so the layout padding between panels stays untouched.
     """
     width = fig.get_figwidth() * 72 - 2 * props.layout_pad * 72
     fig.supxlabel(
-        _wrap(fig, text, props.caption, width),
+        "\n" + _wrap(fig, text, props.caption, width),
         fontsize=props.caption,
         fontweight="normal",
         color=color,
     )
-    engine = fig.get_layout_engine()
-    if engine is not None and hasattr(engine, "set"):
-        engine.set(h_pad=max(engine.get()["h_pad"], props.caption_gap / 72))  # type: ignore[call-arg]
