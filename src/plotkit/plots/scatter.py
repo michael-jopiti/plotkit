@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 
-from plotkit.components import add_colorbar, format_label
+from plotkit.components import add_colorbar, add_marginals, format_label
 from plotkit.data import DataAdapter
 from plotkit.exceptions import DataError
 from plotkit.plots.base import BasePlot
@@ -43,16 +43,35 @@ def point_alpha(sub: pd.DataFrame) -> Any:
     return sub["alpha"].to_numpy() if "alpha" in sub else None
 
 
+def joint_marginals(ax: Axes, d: pd.DataFrame, v: Any) -> Axes:
+    """Add per-``hue`` KDE marginals (one group when ``d`` has no hue) to ``ax``."""
+    if "hue" in d:
+        levels = list(dict.fromkeys(d["hue"]))
+        colors = v.categorical(len(levels)).colors
+        groups = [
+            (
+                c,
+                d.loc[d["hue"] == lvl, "x"].to_numpy(float),
+                d.loc[d["hue"] == lvl, "y"].to_numpy(float),
+            )
+            for lvl, c in zip(levels, colors, strict=False)
+        ]
+    else:
+        groups = [(v.categorical(1).colors[0], d["x"].to_numpy(float), d["y"].to_numpy(float))]
+    return add_marginals(ax, groups, v.hairline * 2, v.bg)
+
+
 @register_plot("scatter")
 class ScatterPlot(BasePlot):
     """Points at (``x_name``, ``y_name``) columns.
 
     Options: ``hue=None`` (category column), ``color=None`` (numeric column, gradient +
     colorbar), ``s=14`` (marker area), ``alpha=None`` (opacity in [0, 1]: a number, a column
-    name, an array with one value per point, or a callable ``f(x, y) -> array``).
+    name, an array with one value per point, or a callable ``f(x, y) -> array``),
+    ``marginals=False`` (``True``: a KDE per ``hue`` level above and beside the axes).
     """
 
-    defaults = {"hue": None, "color": None, "s": 14, "alpha": None}
+    defaults = {"hue": None, "color": None, "s": 14, "alpha": None, "marginals": False}
 
     def prepare_data(self) -> pd.DataFrame:
         """Columns ``x``, ``y`` and optionally ``hue`` / ``color``."""
@@ -64,6 +83,8 @@ class ScatterPlot(BasePlot):
     def draw(self, ax: Axes, d: pd.DataFrame) -> None:
         """Scatter marks."""
         v, s, bg = self.v, self.opt["s"], self.v.bg
+        if self.opt["marginals"]:
+            self.top = joint_marginals(ax, d, v)
         if "color" in d:
             sc = ax.scatter(
                 d["x"],

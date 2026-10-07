@@ -5,21 +5,11 @@ from __future__ import annotations
 import numpy as np
 from matplotlib.axes import Axes
 
+from plotkit.components.marginals import kde
 from plotkit.data import DataAdapter
 from plotkit.exceptions import DataError
 from plotkit.plots.base import BasePlot
 from plotkit.plots.registry import register_plot
-
-
-def kde(x: np.ndarray, grid: np.ndarray) -> np.ndarray:
-    """Gaussian kernel density with Silverman's bandwidth (subsampled above 20 000 points)."""
-    if len(x) > 20_000:
-        x = np.random.default_rng(0).choice(x, 20_000, replace=False)
-    q75, q25 = np.percentile(x, [75, 25])
-    h = 0.9 * min(x.std(ddof=1), (q75 - q25) / 1.34 or x.std(ddof=1)) * len(x) ** -0.2
-    z = (grid[:, None] - x[None, :]) / h
-    dens: np.ndarray = np.exp(-0.5 * z**2).sum(1) / (len(x) * h * np.sqrt(2 * np.pi))
-    return dens
 
 
 @register_plot("continuous")

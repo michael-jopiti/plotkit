@@ -121,4 +121,18 @@ def text_overlaps(fig: Figure) -> list[tuple[str, str]]:
     cap = getattr(fig, "_supxlabel", None)
     if cap is not None and cap.get_text():
         items.append(("caption", cap.get_window_extent()))
-    return [(na, nb) for (na, a), (nb, b) in itertools.combinations(items, 2) if a.overlaps(b)]
+    found = [(na, nb) for (na, a), (nb, b) in itertools.combinations(items, 2) if a.overlaps(b)]
+    frames = [(f"ax{i}.frame", ax.get_window_extent()) for i, ax in enumerate(fig.axes)]
+    found += [
+        (na, nb)
+        for (na, a), (nb, b) in itertools.combinations(frames, 2)
+        if a.width > 0 and b.width > 0 and a.overlaps(b) and _area(a, b) > 1.0
+    ]
+    return found
+
+
+def _area(a: Bbox, b: Bbox) -> float:
+    """Area (px^2) of the intersection of two boxes; touching edges count as zero."""
+    w = min(a.x1, b.x1) - max(a.x0, b.x0)
+    h = min(a.y1, b.y1) - max(a.y0, b.y0)
+    return float(max(w, 0.0) * max(h, 0.0))

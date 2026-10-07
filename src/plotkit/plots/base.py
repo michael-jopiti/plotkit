@@ -131,6 +131,7 @@ class BasePlot(ABC):
         self.v = get_variant(style)
         self.size, self.aspect_override, self.ax, self.save = size, aspect, ax, save
         self.subtitle, self.caption = subtitle, caption
+        self.top: Axes | None = None  # top marginal of a joint plot: it carries the title
         self.opt: dict[str, Any] = {**self.defaults, **options}
 
     def figsize(self, prepared: Any) -> tuple[float, float]:
@@ -155,7 +156,7 @@ class BasePlot(ABC):
             subtitle=self.subtitle,
             color=self.v.muted,
             props=self.v.theme().proportions,
-        ).apply(ax)
+        ).apply(self.top or ax)
         if self.caption:
             add_caption(ax.figure, self.caption, self.v.theme().proportions, self.v.muted)  # type: ignore[arg-type]
 

@@ -10,7 +10,7 @@ from plotkit.data import DataAdapter
 from plotkit.exceptions import DataError
 from plotkit.plots.base import BasePlot
 from plotkit.plots.registry import register_plot
-from plotkit.plots.scatter import MARKERS, add_alpha, point_alpha
+from plotkit.plots.scatter import MARKERS, add_alpha, joint_marginals, point_alpha
 
 
 def pca(features: np.ndarray, n: int = 2) -> tuple[np.ndarray, np.ndarray]:
@@ -48,7 +48,9 @@ class DimRedPlot(BasePlot):
 
     Options: ``hue=None``, ``method=None``, ``n_neighbors=15``, ``min_dist=0.3``, ``seed=0``,
     ``s=10``, ``alpha=None`` (opacity in [0, 1]: a number, a column name, an array with one
-    value per point, or a callable ``f(x, y) -> array`` of the embedding coordinates).
+    value per point, or a callable ``f(x, y) -> array`` of the embedding coordinates),
+    ``marginals=False`` (``True``: a KDE per ``hue`` level above and beside the axes; the
+    equal-scale rule is dropped because the marginals share both axes).
     """
 
     aspect = 1.15
@@ -60,6 +62,7 @@ class DimRedPlot(BasePlot):
         "seed": 0,
         "s": 10,
         "alpha": None,
+        "marginals": False,
     }
 
     def prepare_data(self) -> pd.DataFrame:
@@ -96,6 +99,8 @@ class DimRedPlot(BasePlot):
     def draw(self, ax: Axes, d: pd.DataFrame) -> None:
         """One color and marker shape per hue level."""
         v, s = self.v, self.opt["s"]
+        if self.opt["marginals"]:
+            self.top = joint_marginals(ax, d, v)
         levels = list(dict.fromkeys(d["hue"])) if "hue" in d else [None]
         pal = v.categorical(len(levels))
         # ponytail: K random chunks per level, drawn round-robin, so no level sits wholly on top
@@ -125,4 +130,5 @@ class DimRedPlot(BasePlot):
 
     def finalize(self, ax: Axes) -> None:
         """Equal scale on both axes, so distances are comparable."""
-        ax.set_aspect("equal", adjustable="datalim")
+        if not self.opt["marginals"]:
+            ax.set_aspect("equal", adjustable="datalim")

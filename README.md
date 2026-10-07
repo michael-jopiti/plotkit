@@ -130,9 +130,9 @@ The data in the gallery is synthetic (`plotkit.synthetic`). The UMAP clusters ar
 | `continuous` | 1-D values (list, array, Series), or a table whose column matches `x_name` | `bins=40`, `fit="kde"` (`"kde"`, `"normal"`, `None`) |
 | `boxplot` | table with a group column and a value column, or `{group: values}` | `order=None`, `points=False` |
 | `bar` | table with a category column and a value column | `hue=None`, `error="sd"` (`"sd"`, `"sem"`, `None`), `points=True` |
-| `scatter` | table with x and y columns | `hue=None` (category), `color=None` (numeric column, gradient + colorbar), `s=14` |
+| `scatter` | table with x and y columns | `hue=None` (category), `color=None` (numeric column, gradient + colorbar), `s=14`, `marginals=False` (`True`: a KDE per hue level above and beside the axes) |
 | `line` | table with x and y columns | `hue=None`, `ordered=False` (ordinal hue such as dose), `markers=False` |
-| `dim_red` | coordinate columns, or a feature table when `method` is set | `hue=None`, `method=None` (`"pca"`, `"umap"`), `n_neighbors=15`, `min_dist=0.3`, `seed=0`, `s=10` |
+| `dim_red` | coordinate columns, or a feature table when `method` is set | `hue=None`, `method=None` (`"pca"`, `"umap"`), `n_neighbors=15`, `min_dist=0.3`, `seed=0`, `s=10`, `marginals=False` (as in `scatter`; drops the equal-scale rule) |
 | `survival` | table with time, event (1 = event, 0 = censored) and group columns | `time="time"`, `event="event"`, `group="group"` (missing group column gives one curve) |
 | `volcano` | table with log2 fold change and p-value columns | `lfc="log2fc"`, `p="pvalue"`, `lfc_cut=1.0`, `p_cut=0.01` |
 | `heatmap` | wide table: rows are features, columns are samples, optional leading label column | `zscore=True`, `cbar_label=None` |

@@ -1,6 +1,7 @@
 import matplotlib
 
 matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
@@ -194,3 +195,24 @@ def test_subtitle_and_caption():
     )
     assert res.overlaps() == []
     assert res.fig._supxlabel.get_text().count("\n") >= 1
+
+
+@pytest.mark.parametrize("kind", ["scatter", "dim_red"])
+def test_marginals(kind):
+    plain = getattr(plotkit, kind)("gene_0", "gene_1", "T", syn.expression(), hue="group")
+    res = getattr(plotkit, kind)(
+        "gene_0", "gene_1", "T", syn.expression(), hue="group", marginals=True, subtitle="s"
+    )
+    top, right = res.fig.axes[1:]
+    assert len(plain.fig.axes) == 1 and len(res.fig.axes) == 3
+    assert top.get_xlim() == res.ax.get_xlim() and right.get_ylim() == res.ax.get_ylim()
+    assert len(top.lines) == 3 and len(right.lines) == 3  # one KDE per hue level
+    assert res.overlaps() == []
+
+
+def test_marginals_need_a_subplot():
+    fig = plt.figure()
+    with pytest.raises(plotkit.DataError):
+        plotkit.scatter(
+            "gene_0", "gene_1", "T", syn.expression(), ax=fig.add_axes([0, 0, 1, 1]), marginals=True
+        )
