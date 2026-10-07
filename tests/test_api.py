@@ -178,3 +178,19 @@ def test_alpha_option():
     assert sum(len(c.get_alpha()) for c in res.ax.collections) == 60
     with pytest.raises(plotkit.exceptions.DataError):
         plotkit.dim_red("D1", "D2", "T", emb, alpha=[0.5] * 3)
+
+
+def test_subtitle_and_caption():
+    base = plotkit.scatter("gene_0", "gene_1", "T", syn.expression(), hue="group")
+    assert not base.ax.texts and base.fig._supxlabel is None
+    res = plotkit.scatter(
+        "gene_0",
+        "gene_1",
+        "T",
+        syn.expression(),
+        hue="group",
+        subtitle="n = 60\nthree groups",
+        caption="A long caption " * 12,
+    )
+    assert res.overlaps() == []
+    assert res.fig._supxlabel.get_text().count("\n") >= 1

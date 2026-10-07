@@ -21,6 +21,7 @@ from plotkit.components import (
     AxisFormatter,
     LegendStyler,
     TitleFormatter,
+    add_caption,
     text_overlaps,
 )
 from plotkit.io import save_figure
@@ -77,6 +78,10 @@ class BasePlot(ABC):
         Title (bold, left-aligned).
     data
         pandas or polars table, array-like or mapping (see each plot).
+    subtitle
+        Optional line(s) under the title: regular weight, muted, one level below it.
+    caption
+        Optional note centered below the whole figure (wraps to the figure width).
     style
         Registered style name (``"editorial"``, ``"cobalt"``) or a ``Variant``.
     size
@@ -111,6 +116,8 @@ class BasePlot(ABC):
         y: str | None = None,
         ax: Axes | None = None,
         save: str | Path | None = None,
+        subtitle: str | None = None,
+        caption: str | None = None,
         **options: Any,
     ) -> None:
         unknown = set(options) - set(self.defaults)
@@ -123,6 +130,7 @@ class BasePlot(ABC):
         self.xcol, self.ycol = x or x_name, y or y_name
         self.v = get_variant(style)
         self.size, self.aspect_override, self.ax, self.save = size, aspect, ax, save
+        self.subtitle, self.caption = subtitle, caption
         self.opt: dict[str, Any] = {**self.defaults, **options}
 
     def figsize(self, prepared: Any) -> tuple[float, float]:
@@ -142,7 +150,14 @@ class BasePlot(ABC):
     def style_axes(self, ax: Axes) -> None:
         """Axis labels, hairline spines, title."""
         AxisFormatter(self.x_name, self.y_name, upper=self.v.upper_labels).apply(ax)
-        TitleFormatter(self.title).apply(ax)
+        TitleFormatter(
+            self.title,
+            subtitle=self.subtitle,
+            color=self.v.muted,
+            props=self.v.theme().proportions,
+        ).apply(ax)
+        if self.caption:
+            add_caption(ax.figure, self.caption, self.v.theme().proportions, self.v.muted)  # type: ignore[arg-type]
 
     def style_legend(self, ax: Axes) -> None:
         """Legend placed where it overlaps nothing."""

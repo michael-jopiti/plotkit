@@ -5,7 +5,7 @@ from plotkit.components.colorbar import add_colorbar
 from plotkit.components.layout import Obstacles, text_overlaps
 from plotkit.components.legend import LegendStyler
 from plotkit.components.size import DOUBLE_COLUMN, GOLDEN, SINGLE_COLUMN, SQUARE, SizePreset
-from plotkit.components.title import TitleFormatter
+from plotkit.components.title import TitleFormatter, add_caption
 
 __all__ = [
     "DOUBLE_COLUMN",
@@ -14,6 +14,7 @@ __all__ = [
     "SQUARE",
     "AxisFormatter",
     "Obstacles",
+    "add_caption",
     "add_colorbar",
     "text_overlaps",
     "LegendStyler",

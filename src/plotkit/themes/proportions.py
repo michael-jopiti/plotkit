@@ -87,6 +87,26 @@ class Proportions:
         return round(self.base * 0.9, 1)
 
     @property
+    def subtitle(self) -> float:
+        """Subtitle size (pt): the label size, regular weight, so the bold title leads."""
+        return self.label
+
+    @property
+    def subtitle_gap(self) -> float:
+        """Gap between title baseline block and subtitle block (pt)."""
+        return round(self.base * 0.35, 1)
+
+    @property
+    def caption(self) -> float:
+        """Caption size (pt), one step below labels."""
+        return self.tick
+
+    @property
+    def caption_gap(self) -> float:
+        """Gap between the figure content and the caption (pt)."""
+        return round(self.base * 1.0, 1)
+
+    @property
     def marker(self) -> float:
         """Marker size (pt)."""
         return round(self.base * 0.5, 1)

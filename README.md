@@ -146,6 +146,8 @@ Options common to every call:
 | `aspect` | width / height; each plot has its own default |
 | `x`, `y` | column names, when they differ from the axis labels |
 | `ax` | draw into an existing matplotlib axes |
+| `subtitle` | extra line(s) under the title: regular weight, muted, one level below it; off by default |
+| `caption` | note centered below the whole figure, wrapped to its width; off by default |
 | `save` | path without suffix; writes PDF, SVG and PNG |
 
 Unknown options raise `TypeError` and list the valid ones. Groups and categories use the categorical palette, which holds at most 5 colours; more raises `PaletteError` (group rare categories or use facets).
