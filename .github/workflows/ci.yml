@@ -28,16 +28,63 @@ jobs:
       - run: uv run mypy
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
+        include:  # macOS resolves different fonts: catch layout drift there too
+          - {os: macos-latest, python-version: "3.12"}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
       - run: uv sync --extra dev --extra polars --python ${{ matrix.python-version }}
-      - run: uv run pytest --cov-fail-under=90
+      - run: uv run pytest --cov-fail-under=90 --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        with:
+          name: coverage
+          path: coverage.xml
+
+  tensors:  # torch input is a core promise: run its tests where torch exists
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --extra dev --extra polars --python 3.12
+      - run: uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: uv run --no-sync pytest tests/test_api.py tests/test_adapters.py --no-cov -rs
+
+  examples:  # the gallery is the end-to-end test: every figure must render with no overlaps
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --extra dev --extra polars --python 3.12
+      - run: |
+          uv run python main.py editorial | tee gallery.log
+          uv run python main.py cobalt | tee -a gallery.log
+          ! grep "overlaps" gallery.log | grep -v "overlaps \[\]$"
+
+  build:  # the wheel must build, pass metadata checks and import in a clean env
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv build
+      - run: uvx twine check dist/*
+      - run: |
+          uv venv /tmp/smoke --python 3.12
+          uv pip install --python /tmp/smoke/bin/python dist/*.whl
+          /tmp/smoke/bin/python -c "import plotkit; print(plotkit.__version__)"
