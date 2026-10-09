@@ -40,7 +40,11 @@ class BoxPlot(BasePlot):
     def draw(self, ax: Axes, groups: dict[str, np.ndarray]) -> None:
         """Boxes in categorical colors, medians in ink."""
         v, lw = self.v, self.v.hairline
-        pal = v.categorical(len(groups))
+        # Groups are labelled on the axis, so color is redundant: past the palette size,
+        # draw every box in one color instead of failing.
+        n = len(groups)
+        full = v.categorical().colors
+        colors = full[:n] if n <= len(full) else full[:1] * n
         bp = ax.boxplot(
             list(groups.values()),
             tick_labels=list(groups),
@@ -58,7 +62,7 @@ class BoxPlot(BasePlot):
             capprops={"linewidth": lw, "color": v.fg},
             showfliers=not self.opt["points"],
         )
-        for patch, color in zip(bp["boxes"], pal.colors, strict=True):
+        for patch, color in zip(bp["boxes"], colors, strict=True):
             patch.set_facecolor(color)
         if self.opt["points"]:
             rng = np.random.default_rng(0)

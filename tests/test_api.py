@@ -92,8 +92,8 @@ def test_data_errors():
     with pytest.raises(plotkit.DataError, match="x= / y="):
         plotkit.bar("Transcript region", "Usage", "T", syn.region_usage())
     assert plotkit.bar("Transcript region", "Usage", "T", syn.region_usage(), x="region").ax
-    with pytest.raises(plotkit.PaletteError):
-        plotkit.boxplot("g", "v", "T", {str(i): [1.0, 2.0, 3.0] for i in range(6)})
+    many = plotkit.boxplot("g", "v", "T", {str(i): [1.0, 2.0, 3.0] for i in range(16)})
+    assert len({p.get_facecolor() for p in many.ax.patches}) == 1
     with pytest.raises(plotkit.DataError):
         plotkit.continuous("x", "y", "T", [1.0])
     with pytest.raises(plotkit.DataError, match="fit"):
