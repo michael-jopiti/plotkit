@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 import pandas as pd
 from matplotlib.axes import Axes
 
@@ -11,6 +13,11 @@ from plotkit.plots.base import BasePlot
 from plotkit.plots.registry import register_plot
 
 STYLES = ("-", "--", "-.", ":", (0, (5, 1)))
+
+
+def natural_key(value: object) -> list[object]:
+    """Sort key that orders digit runs by value: ``PC2`` before ``PC10``."""
+    return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", str(value))]
 
 
 @register_plot("line")
@@ -27,6 +34,9 @@ class LinePlot(BasePlot):
     def prepare_data(self) -> pd.DataFrame:
         """Columns ``x``, ``y`` and optionally ``hue``, sorted by ``x``."""
         d = DataAdapter.normalize(self.data, x=self.xcol, y=self.ycol, hue=self.opt["hue"]).frame
+        if d["x"].dtype == object or str(d["x"].dtype).startswith("str"):
+            order = {v: i for i, v in enumerate(sorted(d["x"].unique(), key=natural_key))}
+            return d.sort_values("x", key=lambda s: s.map(order), kind="stable")
         return d.sort_values("x", kind="stable")
 
     def draw(self, ax: Axes, d: pd.DataFrame) -> None:

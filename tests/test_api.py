@@ -57,7 +57,7 @@ def test_plot_runs_clean_and_saves(name, tmp_path):
     kind, args, opts = CASES[name]()
     res = plotkit.plot(kind, *args, **opts, save=tmp_path / name)
     assert res.overlaps() == []
-    assert {p.suffix for p in tmp_path.iterdir()} == {".pdf", ".svg", ".png"}
+    assert {p.suffix for p in tmp_path.iterdir()} == {".png"}
     assert getattr(plotkit, kind)(*args, **opts).ax is not None
 
 
@@ -244,6 +244,27 @@ def test_heatmap_fixed_range_and_annotation():
     res = plotkit.heatmap("X", "Y", "T", df, zscore=False, vmin=0, vmax=100, annotate=True)
     assert res.ax.images[0].get_clim() == (0, 100)
     assert len(res.ax.texts) == 4
+
+
+def test_line_sorts_string_x_naturally():
+    df = pd.DataFrame({"pc": [f"PC{i}" for i in range(1, 13)][::-1], "v": range(12)})
+    res = plotkit.line("Component", "Value", "T", df, x="pc", y="v")
+    labels = [t.get_text() for t in res.ax.get_xticklabels()]
+    assert labels == [f"PC{i}" for i in range(1, 13)] or labels == []
+    xs = list(res.ax.lines[0].get_xdata())
+    assert xs == [f"PC{i}" for i in range(1, 13)]
+
+
+def test_axis_limits_and_png_only_default(tmp_path):
+    res = plotkit.line(
+        "x", "y", "T", pd.DataFrame({"x": [1, 2, 3], "y": [0.93, 0.95, 0.97]}), ylim=(0.5, 1)
+    )
+    assert res.ax.get_ylim() == (0.5, 1)
+    assert [p.suffix for p in res.save(tmp_path / "f")] == [".png"]
+    assert [p.suffix for p in res.save(tmp_path / "g", formats=("svg", "png"), dpi=100)] == [
+        ".svg",
+        ".png",
+    ]
 
 
 def test_save_keeps_dots_in_name(tmp_path):

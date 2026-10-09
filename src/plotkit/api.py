@@ -20,7 +20,10 @@ Common keyword options, accepted by every function (:class:`CommonOptions`):
 ``subtitle``, ``caption``
     Optional text under the title / below the figure.
 ``save``
-    Path without suffix; writes PDF, SVG and PNG.
+    Path without suffix; writes a PNG. For other formats or dpi call
+    ``result.save(path, formats=..., dpi=...)``.
+``xlim``, ``ylim``
+    ``(low, high)`` axis limits, e.g. ``ylim=(0.5, 1)`` for a score bounded by 1.
 """
 
 from __future__ import annotations
@@ -52,6 +55,8 @@ class CommonOptions(TypedDict, total=False):
     y: str
     ax: Axes
     save: str | Path
+    xlim: tuple[float, float]
+    ylim: tuple[float, float]
     subtitle: str
     caption: str
 

@@ -41,12 +41,13 @@ def _ink_bbox(fig: Figure, pad_inches: float, probe_dpi: int = 300) -> Bbox:
 def save_figure(
     fig: Figure,
     path: str | Path,
-    formats: Iterable[str] = ("pdf", "svg", "png"),
+    formats: Iterable[str] = ("png",),
     dpi: int = 300,
     pad_inches: float = 0.15,
 ) -> list[Path]:
     """Save ``fig`` once per format, replacing a trailing image suffix of ``path``.
 
+    PNG only by default; pass ``formats=("pdf", "svg")`` and ``dpi`` for others.
     ``"out/fig.png"`` and ``"out/fig"`` both write ``out/fig.<fmt>``; any other dot
     (``"out/fig_0.5"``) is part of the name and is kept.
 

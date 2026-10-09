@@ -42,7 +42,8 @@ def test_axis_title_legend():
 def test_save_figure(tmp_path, dpi):
     fig = Figure()
     fig.subplots().plot([0, 1])
-    files = save_figure(fig, tmp_path / "sub" / "f.png", dpi=dpi)
+    assert [f.suffix for f in save_figure(fig, tmp_path / "d" / "f")] == [".png"]
+    files = save_figure(fig, tmp_path / "sub" / "f.png", formats=("pdf", "svg", "png"), dpi=dpi)
     assert [f.suffix for f in files] == [".pdf", ".svg", ".png"]
     assert all(f.stat().st_size > 0 for f in files)
     assert b"/FontFile2" in files[0].read_bytes()

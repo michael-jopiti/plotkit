@@ -53,9 +53,12 @@ class PlotResult:
             return text_overlaps(self.fig)
 
     def save(
-        self, path: str | Path, formats: tuple[str, ...] = ("pdf", "svg", "png"), dpi: int = 300
+        self, path: str | Path, formats: tuple[str, ...] = ("png",), dpi: int = 300
     ) -> list[Path]:
-        """Write ``path.pdf/.svg/.png`` cropped and centered with equal padding."""
+        """Write ``path.png`` (or each of ``formats``) cropped and centered with equal padding.
+
+        Add ``formats=("pdf", "svg")`` for vector output and ``dpi`` for the raster resolution.
+        """
         with self.context():
             return save_figure(self.fig, path, formats=formats, dpi=dpi)
 
@@ -93,7 +96,11 @@ class BasePlot(ABC):
     ax
         Draw into an existing axes instead of creating a figure.
     save
-        Path (without suffix) to write PDF, SVG and PNG.
+        Path (without suffix) to write a PNG. Use ``result.save(path, formats=..., dpi=...)`` for
+        other formats or resolution.
+    xlim, ylim
+        ``(low, high)`` axis limits; ``None`` keeps matplotlib's choice. Use them to show
+        bounded scores (0-1, percentages) on a scale where small differences stay small.
     **options
         Plot-specific options; unknown names raise ``TypeError``.
     """
@@ -116,6 +123,8 @@ class BasePlot(ABC):
         y: str | None = None,
         ax: Axes | None = None,
         save: str | Path | None = None,
+        xlim: tuple[float, float] | None = None,
+        ylim: tuple[float, float] | None = None,
         subtitle: str | None = None,
         caption: str | None = None,
         **options: Any,
@@ -132,6 +141,7 @@ class BasePlot(ABC):
         self.xcol, self.ycol = x or x_name, y or y_name
         self.v = get_variant(style)
         self.size, self.aspect_override, self.ax, self.save = size, aspect, ax, save
+        self.xlim, self.ylim = xlim, ylim
         self.subtitle, self.caption = subtitle, caption
         self.top: Axes | None = None  # top marginal of a joint plot: it carries the title
         self.opt: dict[str, Any] = {**self.defaults, **options}
@@ -183,6 +193,10 @@ class BasePlot(ABC):
             self.draw(ax, prepared)
             self.style_axes(ax)
             self.finalize(ax)
+            if self.xlim is not None:
+                ax.set_xlim(self.xlim)
+            if self.ylim is not None:
+                ax.set_ylim(self.ylim)
             self.style_legend(ax)
         result = PlotResult(fig, ax, rc)
         if self.save is not None:
