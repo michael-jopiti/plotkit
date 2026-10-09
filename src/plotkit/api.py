@@ -398,6 +398,9 @@ def heatmap(
     *,
     zscore: bool = True,
     cbar_label: str | None = None,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    annotate: bool = False,
     **common: Unpack[CommonOptions],
 ) -> PlotResult:
     """Heatmap of a wide table (rows = features, columns = samples).
@@ -412,9 +415,24 @@ def heatmap(
         Standardize each row; the color range is then fixed to -2..2.
     cbar_label
         Colorbar label; defaults to ``"z-score"`` or ``"value"``.
+    vmin, vmax
+        Fixed color range (e.g. 0 and 100 for percentages, -1 and 1 for correlations).
+        Overrides the -2..2 z-score range.
+    annotate
+        Print each cell value inside the cell.
     **common
         See :class:`CommonOptions`.
     """
     return plot(
-        "heatmap", x_name, y_name, title, data, zscore=zscore, cbar_label=cbar_label, **common
+        "heatmap",
+        x_name,
+        y_name,
+        title,
+        data,
+        zscore=zscore,
+        cbar_label=cbar_label,
+        vmin=vmin,
+        vmax=vmax,
+        annotate=annotate,
+        **common,
     )

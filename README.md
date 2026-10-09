@@ -137,7 +137,7 @@ The data in the gallery is synthetic (`plotkit.synthetic`). The UMAP clusters ar
 | `dim_red` | coordinate columns, or a feature table when `method` is set | `hue=None` (a column name; with `method` set it must be one), `method=None` (`"pca"`, `"umap"`), `n_neighbors=15`, `min_dist=0.3`, `seed=0`, `s=10`, `alpha=None` (as in `scatter`), `marginals=False` (as in `scatter`; drops the equal-scale rule) |
 | `survival` | table with time, event (1 = event, 0 = censored) and group columns | `time="time"`, `event="event"`, `group="group"` (a missing default group column gives one curve; a group column you name that does not exist raises `DataError`) |
 | `volcano` | table with log2 fold change and p-value columns | `lfc="log2fc"`, `p="pvalue"`, `lfc_cut=1.0`, `p_cut=0.01` |
-| `heatmap` | wide table: rows are features, columns are samples, optional leading label column | `zscore=True`, `cbar_label=None` |
+| `heatmap` | wide table: rows are features, columns are samples, optional leading label column | `zscore=True`, `cbar_label=None`, `vmin=None`, `vmax=None` (fixed color range), `annotate=False` (print cell values) |
 
 Options common to every call:
 

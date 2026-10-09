@@ -239,6 +239,13 @@ def test_heatmap_constant_row_is_finite():
     assert np.isfinite(res.ax.images[0].get_array()).all()
 
 
+def test_heatmap_fixed_range_and_annotation():
+    df = pd.DataFrame({"m": ["a", "b"], "p": [0.0, 50.0], "q": [100.0, 25.0]})
+    res = plotkit.heatmap("X", "Y", "T", df, zscore=False, vmin=0, vmax=100, annotate=True)
+    assert res.ax.images[0].get_clim() == (0, 100)
+    assert len(res.ax.texts) == 4
+
+
 def test_save_keeps_dots_in_name(tmp_path):
     res = plotkit.continuous("x", "y", "T", syn.gaussian())
     assert res.save(tmp_path / "fig_0.5", formats=("png",))[0].name == "fig_0.5.png"
