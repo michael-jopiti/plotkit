@@ -111,9 +111,9 @@ def text_overlaps(fig: Figure) -> list[tuple[str, str]]:
             if t.get_visible() and t.get_text():
                 items.append((name, t.get_window_extent()))
         items += [
-            (f"ax{i}.subtitle", t.get_window_extent())
+            (f"ax{i}.{t.get_gid()}", t.get_window_extent())
             for t in ax.texts
-            if t.get_gid() == "subtitle"
+            if t.get_gid() in ("subtitle", "panel_caption")
         ]
         leg = ax.get_legend()
         if leg is not None:

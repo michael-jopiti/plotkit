@@ -22,6 +22,7 @@ from plotkit.components import (
     LegendStyler,
     TitleFormatter,
     add_caption,
+    add_panel_caption,
     text_overlaps,
 )
 from plotkit.io import save_figure
@@ -143,6 +144,7 @@ class BasePlot(ABC):
         self.size, self.aspect_override, self.ax, self.save = size, aspect, ax, save
         self.xlim, self.ylim = xlim, ylim
         self.subtitle, self.caption = subtitle, caption
+        self.panel_width_pt: float | None = None  # set by grid(): caption sits under the axes
         self.top: Axes | None = None  # top marginal of a joint plot: it carries the title
         self.opt: dict[str, Any] = {**self.defaults, **options}
 
@@ -169,7 +171,10 @@ class BasePlot(ABC):
             color=self.v.muted,
             props=self.v.theme().proportions,
         ).apply(self.top or ax)
-        if self.caption:
+        if self.caption and self.panel_width_pt is not None:
+            props = self.v.theme().proportions
+            add_panel_caption(ax, self.caption, props, self.v.muted, self.panel_width_pt)
+        elif self.caption:
             add_caption(ax.figure, self.caption, self.v.theme().proportions, self.v.muted)  # type: ignore[arg-type]
 
     def style_legend(self, ax: Axes) -> None:

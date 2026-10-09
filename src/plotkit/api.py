@@ -35,7 +35,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypedDict
 import numpy as np
 from matplotlib.axes import Axes
 
-from plotkit.plots import PlotResult, plots
+from plotkit.plots import GridResult, Panel, PlotResult, plots, render_grid
 from plotkit.themes import Variant
 
 if TYPE_CHECKING:
@@ -90,6 +90,49 @@ def plot(
     PlotResult
     """
     return plots.get(kind)(x_name, y_name, title, data, **options).render()
+
+
+def grid(
+    panels: Sequence[Sequence[Panel | None]],
+    title: str | None = None,
+    subtitle: str | None = None,
+    caption: str | None = None,
+    *,
+    style: str | Variant = "editorial",
+    size: str | tuple[float, float] = "double",
+    aspect: float = 4 / 3,
+    save: str | Path | None = None,
+) -> GridResult:
+    """Matrix of plots sharing one style, with a figure title, subtitle and caption.
+
+    Each panel keeps its own title, subtitle and caption (pass them to :class:`Panel`).
+    The figure title and subtitle sit above the matrix, the caption below it.
+
+    Parameters
+    ----------
+    panels
+        List of equal-length rows of :class:`Panel`; ``None`` leaves a cell empty.
+    title, subtitle, caption
+        Figure-level text.
+    style
+        Registered style name or a :class:`~plotkit.Variant`, used by every panel.
+    size
+        ``"single"``, ``"double"`` (default) or total ``(width, height)`` in inches. With a
+        name, the height follows ``aspect`` per panel plus room for the figure title.
+    aspect
+        Width / height of one panel.
+    save
+        Path without suffix; writes a PNG.
+
+    Returns
+    -------
+    GridResult
+        ``.fig``, ``.axes`` (matrix of axes), ``.save()``, ``.overlaps()``.
+    """
+    result = render_grid(panels, title, subtitle, caption, style, size, aspect)
+    if save is not None:
+        result.save(save)
+    return result
 
 
 def continuous(

@@ -113,3 +113,29 @@ def add_caption(fig: Figure, text: str, props: Proportions, color: str | None = 
         fontweight="normal",
         color=color,
     )
+
+
+def add_panel_caption(
+    ax: Axes, text: str, props: Proportions, color: str | None, width_pt: float
+) -> None:
+    """Left-aligned caption under ``ax``, below its tick labels and x label.
+
+    The drop below the axes is measured from the current tight box, so it holds when
+    constrained layout moves the axes. Add the x label and ticks before calling.
+    """
+    fig = ax.figure
+    r = _renderer(fig)  # type: ignore[arg-type]
+    drop = (ax.get_window_extent(r).y0 - ax.get_tightbbox(r).y0) * 72 / fig.dpi  # type: ignore[union-attr]
+    ax.annotate(
+        _wrap(fig, text, props.caption, width_pt),  # type: ignore[arg-type]
+        (0, 0),
+        xycoords="axes fraction",
+        xytext=(0, -(max(drop, 0.0) + 2 * props.subtitle_gap)),
+        textcoords="offset points",
+        ha="left",
+        va="top",
+        fontsize=props.caption,
+        color=color,
+        annotation_clip=False,
+        gid="panel_caption",
+    )

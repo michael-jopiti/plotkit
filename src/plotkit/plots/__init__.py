@@ -12,6 +12,15 @@ from plotkit.plots import (  # noqa: F401  (registration side effects)
     volcano,
 )
 from plotkit.plots.base import BasePlot, PlotResult
+from plotkit.plots.grid import GridResult, Panel, render_grid
 from plotkit.plots.registry import plots, register_plot
 
-__all__ = ["BasePlot", "PlotResult", "plots", "register_plot"]
+__all__ = [
+    "BasePlot",
+    "GridResult",
+    "Panel",
+    "PlotResult",
+    "plots",
+    "register_plot",
+    "render_grid",
+]

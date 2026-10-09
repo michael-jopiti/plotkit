@@ -49,3 +49,38 @@ show(
     "scatter",
     plotkit.scatter("gene_0", "gene_1", "Scatter", syn.expression(), color="gene_2", **kw),
 )
+
+G = plotkit.Panel
+show(
+    "grid",
+    plotkit.grid(
+        [
+            [
+                G("continuous", "Value (a.u.)", "Density", "Gaussian", gauss, subtitle="n = 5000"),
+                G(
+                    "boxplot",
+                    "Group",
+                    "Value (a.u.)",
+                    "Quantiles",
+                    syn.groups(),
+                    caption="Boxes show quartiles.",
+                ),
+            ],
+            [
+                G(
+                    "bar",
+                    "Region",
+                    "Usage (%)",
+                    "Region usage",
+                    syn.region_usage(),
+                    hue="condition",
+                ),
+                G("heatmap", "Samples", "Genes", "Expression", syn.expression_matrix()),
+            ],
+        ],
+        title="Overview",
+        subtitle="Four readouts of one synthetic cohort",
+        caption="Synthetic data; every panel shares one style.",
+        **kw,
+    ),
+)

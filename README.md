@@ -21,6 +21,7 @@ That writes `figure.png` (300 dpi), cropped and centred with equal padding on al
 - [Quickstart](#quickstart)
 - [Gallery](#gallery)
 - [Plot reference](#plot-reference)
+- [Grids of plots](#grids-of-plots)
 - [Styles](#styles)
 - [Data: pandas and polars](#data-pandas-and-polars)
 - [Saving and customizing](#saving-and-customizing)
@@ -74,7 +75,7 @@ Each call returns a `PlotResult`:
 result = plotkit.boxplot("Group", "Value", "Quantiles", syn.groups())
 result.fig, result.ax  # matplotlib objects, keep customizing
 result.overlaps()  # [] when no text elements collide
-result.save("out/boxplot")  # PDF + SVG + PNG
+result.save("out/boxplot")  # PNG; formats=("pdf", "svg") for vector
 ```
 
 In a Jupyter notebook, `plotkit.<kind>(...)` returns the result; use `result.fig` to display it.
@@ -156,6 +157,44 @@ Options common to every call:
 Every function has explicit, typed keyword-only options, so editors complete them and mypy checks them; an unknown option raises `TypeError`. Bad option values (`error="se"`, `order=["nope"]`, `size="triple"`) raise `DataError` or `ValueError` naming the valid choices. Groups and categories use the categorical palette, which holds at most 5 colours; more raises `PaletteError` (group rare categories or use facets).
 
 `plotkit.synthetic` provides demo data for every plot: `gaussian`, `groups`, `region_usage`, `expression`, `single_cells`, `differential_expression`, `survival_data`, `expression_matrix`, `dose_response`.
+
+## Grids of plots
+
+`plotkit.grid` lays plots out as a matrix. Each `Panel` takes the arguments of the matching plot call, including its own `title`, `subtitle` and `caption`; the figure gets its own title (above), subtitle (under it) and caption (below). One style covers every panel, so palettes stay consistent.
+
+```python
+from plotkit import Panel
+
+plotkit.grid(
+    [
+        [
+            Panel(
+                "continuous",
+                "Value",
+                "Density",
+                "Gaussian",
+                syn.gaussian(2, 0.5),
+                subtitle="n = 5000",
+            ),
+            Panel(
+                "boxplot",
+                "Group",
+                "Value",
+                "Quantiles",
+                syn.groups(),
+                caption="Boxes show quartiles.",
+            ),
+        ],
+        [Panel("bar", "Region", "Usage (%)", "Usage", syn.region_usage(), hue="condition"), None],
+    ],
+    title="Overview",
+    subtitle="Three readouts",
+    caption="Synthetic data.",
+    save="figures/overview",
+)
+```
+
+Rows must have equal length; `None` leaves a cell empty. `size` is `"double"` by default (or `"single"` / `(w, h)`), `aspect` is per panel. The result is a `GridResult`: `.fig`, `.axes` (matrix), `.save()`, `.overlaps()`. `style`, `size`, `aspect`, `ax` and `save` are figure-wide and are rejected on a `Panel`.
 
 ## Styles
 

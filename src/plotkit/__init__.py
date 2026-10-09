@@ -13,6 +13,7 @@ from plotkit.api import (
     boxplot,
     continuous,
     dim_red,
+    grid,
     heatmap,
     line,
     plot,
@@ -28,7 +29,7 @@ from plotkit.exceptions import (
     ThemeError,
 )
 from plotkit.io import save_figure
-from plotkit.plots import BasePlot, PlotResult, register_plot
+from plotkit.plots import BasePlot, GridResult, Panel, PlotResult, register_plot
 from plotkit.themes import Variant, register_variant
 
 try:
@@ -39,7 +40,9 @@ except PackageNotFoundError:  # running from an uninstalled source tree
 __all__ = [
     "BasePlot",
     "DataError",
+    "GridResult",
     "PaletteError",
+    "Panel",
     "PlotResult",
     "PlotkitError",
     "RegistryError",
@@ -49,6 +52,7 @@ __all__ = [
     "boxplot",
     "continuous",
     "dim_red",
+    "grid",
     "heatmap",
     "line",
     "plot",
