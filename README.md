@@ -240,7 +240,7 @@ result.ax.set_xlim(-5, 5)  # keep customizing with matplotlib
 result.save("out/scatter")  # PNG; add formats=("pdf", "svg"), dpi=600 for more
 ```
 
-`save` writes a PNG, cropped to the drawn content and padded exactly 0.15 in on every side. For other formats or resolution call `result.save(path, formats=("pdf", "svg", "png"), dpi=600)`. A trailing image suffix in the path is replaced (`"out/fig.png"` and `"out/fig"` are the same); other dots stay in the name (`"out/fig_0.5"` writes `fig_0.5.png`). PDF embeds TrueType fonts (type 42). SVG stores text as paths, so it renders the same everywhere but the text is not editable. For lower-level control, use `plotkit.save_figure(fig, path, formats=("pdf", "png"), dpi=600, pad_inches=0.2)`.
+`save` writes a PNG, cropped to the drawn content and padded 0.15 in on every side (within 2 px at 300 dpi). For other formats or resolution call `result.save(path, formats=("pdf", "svg", "png"), dpi=600)`. A trailing image suffix in the path is replaced (`"out/fig.png"` and `"out/fig"` are the same); other dots stay in the name (`"out/fig_0.5"` writes `fig_0.5.png`). PDF embeds TrueType fonts (type 42). SVG stores text as paths, so it renders the same everywhere but the text is not editable. For lower-level control, use `plotkit.save_figure(fig, path, formats=("pdf", "png"), dpi=600, pad_inches=0.2)`.
 
 Fonts are resolved when a figure is drawn, so draw and save inside the plot's theme. `result.save()`, `result.overlaps()` and `result.to_array()` do this for you. If you call `result.fig.savefig(...)` yourself, wrap it:
 
