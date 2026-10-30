@@ -253,6 +253,16 @@ Importing plotkit never changes matplotlib's global settings; themes are applied
 
 Legends are placed automatically: plotkit tests every inside position against the plotted lines, points, bars and images and picks one that covers nothing. If none is free, the legend goes outside on the right. `result.overlaps()` reports colliding titles, labels and legends.
 
+## Web pages
+
+`plotkit.web.export("site")` writes `site/plotkit.js`: a small SVG renderer in the same style (page colour, hairline axes, bold left title, categorical colours with dash cues), with the style baked in. A page redraws a line plot from live values:
+
+```js
+plotkit.line(el, {xlabel: "Time (days)", ylabel: "Fraction", title: "Title",
+                  series: [{label: "I", x, y}], vlines: [{x: 5, label: "peak"}],
+                  hlines: [{y: 0.3, label: "level"}], points: [{x, y, label}]});
+```
+
 ## Extending plotkit
 
 ### A new plot: one class, one decorator
