@@ -47,6 +47,7 @@ def test_save_figure(tmp_path, dpi):
     assert [f.suffix for f in files] == [".pdf", ".svg", ".png"]
     assert all(f.stat().st_size > 0 for f in files)
     assert b"/FontFile2" in files[0].read_bytes()
+    assert [f.name for f in save_figure(fig, tmp_path / "s", formats="svg")] == ["s.svg"]
 
 
 def test_save_figure_equal_margins(tmp_path):

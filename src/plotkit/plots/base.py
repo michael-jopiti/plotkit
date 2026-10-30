@@ -54,7 +54,7 @@ class PlotResult:
             return text_overlaps(self.fig)
 
     def save(
-        self, path: str | Path, formats: tuple[str, ...] = ("png",), dpi: int = 300
+        self, path: str | Path, formats: tuple[str, ...] | str = ("png",), dpi: int = 300
     ) -> list[Path]:
         """Write ``path.png`` (or each of ``formats``) cropped and centered with equal padding.
 

@@ -41,7 +41,7 @@ def _ink_bbox(fig: Figure, pad_inches: float, probe_dpi: int = 300) -> Bbox:
 def save_figure(
     fig: Figure,
     path: str | Path,
-    formats: Iterable[str] = ("png",),
+    formats: Iterable[str] | str = ("png",),
     dpi: int = 300,
     pad_inches: float = 0.15,
 ) -> list[Path]:
@@ -62,6 +62,8 @@ def save_figure(
         Written files.
     """
     base = Path(path)
+    if isinstance(formats, str):  # "pdf" would otherwise iterate as "p", "d", "f"
+        formats = (formats,)
     if base.suffix.lower() in _SUFFIXES:
         base = base.with_suffix("")
     base.parent.mkdir(parents=True, exist_ok=True)
